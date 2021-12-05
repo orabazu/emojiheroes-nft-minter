@@ -70,7 +70,7 @@ const setupEventListener = async (dispatch: React.Dispatch<AccountAction>) => {
     connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
       const payload = `${OPENSEA_LINK}${CONTRACT_ADDRESS}/${tokenId.toNumber()}`;
       alert(`Hey there! We've minted your NFT and sent it to your wallet. 
-      It may be blank right now. It can take a max of 10 min to show up on OpenSea.`)
+      It may be blank right now. It can take a max of 10 min to show up on OpenSea.`);
       dispatch({ type: AccountActionTypes.SET_OPENSEA_LINK, payload });
     });
   } catch (error) {
@@ -85,10 +85,16 @@ const checkIfWalletIsConnected = async (
 
   if (!ethereum) {
     console.log("Make sure you have metamask!");
-    dispatch({type:AccountActionTypes.SET_METAMASK_NOT_FOUND, payload :true })
+    dispatch({
+      type: AccountActionTypes.SET_METAMASK_NOT_FOUND,
+      payload: true,
+    });
     return;
   } else {
-    dispatch({type:AccountActionTypes.SET_METAMASK_NOT_FOUND, payload :false })
+    dispatch({
+      type: AccountActionTypes.SET_METAMASK_NOT_FOUND,
+      payload: false,
+    });
     console.log("We have the ethereum object", ethereum);
     const provider = new ethers.providers.Web3Provider(ethereum, "any");
     provider.on("network", (newNetwork, oldNetwork) => {
@@ -96,9 +102,18 @@ const checkIfWalletIsConnected = async (
       // event with a null oldNetwork along with the newNetwork. So, if the
       // oldNetwork exists, it represents a changing network
       if (oldNetwork) {
-        console.log(oldNetwork)
+        console.log(oldNetwork);
         window.location.reload();
       }
+    });
+
+    ethereum.on('accountsChanged', async () => {
+      // Do something
+      const accounts = await ethereum.request({ method: "eth_accounts" });
+      if(!accounts.length){
+        dispatch({ type: AccountActionTypes.SET_ACCOUNT, payload: null });
+      }
+      console.log("accountsChanged");
     });
   }
 
