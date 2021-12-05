@@ -95,8 +95,10 @@ const checkIfWalletIsConnected = async (
 
   if (!ethereum) {
     console.log("Make sure you have metamask!");
+    dispatch({type:AccountActionTypes.SET_METAMASK_NOT_FOUND, payload :true })
     return;
   } else {
+    dispatch({type:AccountActionTypes.SET_METAMASK_NOT_FOUND, payload :false })
     console.log("We have the ethereum object", ethereum);
   }
 

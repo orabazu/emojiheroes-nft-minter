@@ -6,7 +6,7 @@ export type AccountState = {
   }|null;
   openSeaLinks: string[]
   isAppDisabled: boolean
-  chainId: string
+  metamaskNotFound: boolean
 };
 
 const initialState: AccountState = {
@@ -14,7 +14,7 @@ const initialState: AccountState = {
   isLoading: false,
   openSeaLinks: [],
   isAppDisabled: true,
-  chainId: ""
+  metamaskNotFound: false
 };
 
 export enum AccountActionTypes {
@@ -23,7 +23,7 @@ export enum AccountActionTypes {
   SET_ACCOUNT_FAILURE = "SET_ACCOUNT_FAILURE",
   SET_DISABLE_APP = "SET_DISABLE_APP",
   SET_OPENSEA_LINK = "SET_OPENSEA_LINK",
-  SET_CHAIN = "SET_CHAIN"
+  SET_METAMASK_NOT_FOUND = "SET_METAMASK_NOT_FOUND"
 }
 
 export type AccountAction =
@@ -32,7 +32,7 @@ export type AccountAction =
   | { type: AccountActionTypes.SET_ACCOUNT_FAILURE }
   | { type: AccountActionTypes.SET_DISABLE_APP; payload: boolean }
   | { type: AccountActionTypes.SET_OPENSEA_LINK; payload: string }
-  | { type: AccountActionTypes.SET_CHAIN; payload: string }
+  | { type: AccountActionTypes.SET_METAMASK_NOT_FOUND; payload: boolean }
 
 const reducer = (state: AccountState, action: AccountAction): AccountState => {
   switch (action.type) {
@@ -56,10 +56,10 @@ const reducer = (state: AccountState, action: AccountAction): AccountState => {
         ...state,
         isAppDisabled: action.payload,
       };
-    case AccountActionTypes.SET_CHAIN:
+    case AccountActionTypes.SET_METAMASK_NOT_FOUND:
       return {
         ...state,
-        chainId: action.payload,
+        metamaskNotFound: action.payload,
       };
     case AccountActionTypes.SET_OPENSEA_LINK:
       return {

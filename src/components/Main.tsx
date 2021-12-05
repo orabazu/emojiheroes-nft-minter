@@ -61,7 +61,7 @@ export const Main = () => {
 
   const renderNFTs = () => {
     const nfts = [nft1, nft2, nft3, nft4];
-    return nfts.map((nft) => <img className={"its-nft-babe"} src={nft} alt="nfts"/>);
+    return nfts.map((nft, id) => <img className={"its-nft-babe"} src={nft} alt="nfts" key={id}/>);
   };
 
   return (
@@ -89,7 +89,7 @@ export const Main = () => {
          <p className="sub-text transactions">Transactions</p>
         <ul>
           {transactionList.map((t, i) => (
-            <li>
+            <li key={i}>
               <a href={t} target="_blank" rel="noreferrer" className={"link"}>
                 Etherscan
               </a>

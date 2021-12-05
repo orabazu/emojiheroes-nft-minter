@@ -9,9 +9,16 @@ import ethLogo from "../assets/eth.png";
 
 export const Header = () => {
   const [accountState, accountDispatch] = useAccountContext();
-  const buttonText = accountState.isAppDisabled
-    ? "Switch to rinkeby network"
-    : "Connect to a wallet";
+  let buttonText 
+  
+  if(accountState.metamaskNotFound){
+    buttonText = "Please install metamask"
+  } else if (accountState.isAppDisabled){
+    buttonText = "Switch to rinkeby network"
+  } else {
+    buttonText = "Connect to a wallet"
+  }
+
   return (
     <div className={"header"}>
       <span className={"its-unicorn-baby"}>🦄</span>
@@ -22,7 +29,7 @@ export const Header = () => {
             : connectWallet(accountDispatch)
         }
         className={"cta-button connect-wallet-button"}
-        disabled={!!accountState?.account}
+        disabled={!!accountState?.account || accountState.metamaskNotFound}
       >
         {accountState.account
           ? `${accountState?.account.address} | ${accountState?.account.balance}`

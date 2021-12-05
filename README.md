@@ -1,11 +1,8 @@
 # buildspace Mint Your Own NFT Collection
 
-### **Welcome 👋**
-To get started with this course, clone this repo and follow these commands:
+### **Emoji Heroes NFT collection 🦄**
+This is project to practice NFT minting on Web3 and based on  [buildspace](https://app.buildspace.so/courses/CO961ddb5f-f428-4608-9949-a9a2f461eb3f)
 
-1. Run `npm install` at the root of your directory
-2. Run `npm run start` to start the project
-3. Start coding!
+`npm install` and `npm start` to run locally
 
-### **Questions?**
-Have some questions make sure you head over to your [buildspace Dashboard](https://app.buildspace.so/courses/CO961ddb5f-f428-4608-9949-a9a2f461eb3f) and link your Discord account so you can get access to helpful channels and your instructor!
+🦊 Make sure you have metamask installed if you want to try out and se some actual NFTs 
