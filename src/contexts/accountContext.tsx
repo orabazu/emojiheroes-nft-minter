@@ -73,16 +73,6 @@ const setupEventListener = async (dispatch: React.Dispatch<AccountAction>) => {
       It may be blank right now. It can take a max of 10 min to show up on OpenSea.`)
       dispatch({ type: AccountActionTypes.SET_OPENSEA_LINK, payload });
     });
-
-    provider.on("network", (newNetwork, oldNetwork) => {
-      // When a Provider makes its initial connection, it emits a "network"
-      // event with a null oldNetwork along with the newNetwork. So, if the
-      // oldNetwork exists, it represents a changing network
-      if (oldNetwork) {
-        alert(newNetwork);
-        window.location.reload();
-      }
-    });
   } catch (error) {
     console.log(error);
   }
@@ -100,6 +90,16 @@ const checkIfWalletIsConnected = async (
   } else {
     dispatch({type:AccountActionTypes.SET_METAMASK_NOT_FOUND, payload :false })
     console.log("We have the ethereum object", ethereum);
+    const provider = new ethers.providers.Web3Provider(ethereum, "any");
+    provider.on("network", (newNetwork, oldNetwork) => {
+      // When a Provider makes its initial connection, it emits a "network"
+      // event with a null oldNetwork along with the newNetwork. So, if the
+      // oldNetwork exists, it represents a changing network
+      if (oldNetwork) {
+        console.log(oldNetwork)
+        window.location.reload();
+      }
+    });
   }
 
   const chainId = await ethereum.request({ method: "eth_chainId" });
