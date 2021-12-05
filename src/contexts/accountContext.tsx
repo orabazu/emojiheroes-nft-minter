@@ -48,7 +48,6 @@ async function connectWallet(dispatch: React.Dispatch<AccountAction>) {
       balance: Number(ethers.utils.formatEther(balance)).toFixed(3),
     };
 
-    console.log("Connected", accounts);
     dispatch({ type: AccountActionTypes.SET_ACCOUNT, payload });
     dispatch({ type: AccountActionTypes.SET_ISLOADING, payload: false });
     setupEventListener(dispatch);

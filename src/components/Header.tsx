@@ -9,7 +9,6 @@ import ethLogo from "../assets/eth.png";
 
 export const Header = () => {
   const [accountState, accountDispatch] = useAccountContext();
-  console.log(accountState);
   const buttonText = accountState.isAppDisabled
     ? "Switch to rinkeby network"
     : "Connect to a wallet";

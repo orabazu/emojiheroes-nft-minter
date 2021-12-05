@@ -56,9 +56,8 @@ export const Main = () => {
 
   useEffect(() => {
     checkIfWalletIsConnected(accountDispatch);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  console.log("accountState.account}", accountState.account);
 
   const renderNFTs = () => {
     const nfts = [nft1, nft2, nft3, nft4];
