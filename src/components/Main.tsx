@@ -1,26 +1,23 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import myEpicNft from "../abi/MyEpicNFT.json";
 
-
-import { useAccountContext, checkIfWalletIsConnected } from "../contexts/accountContext";
-import { AccountActionTypes } from "../reducers/accountReducer";
+import {
+  useAccountContext,
+  checkIfWalletIsConnected,
+} from "../contexts/accountContext";
 import { CONTRACT_ADDRESS } from "../const";
 import { Header } from "./Header";
 
-import nft1 from '../assets/nft1.svg'
-import nft2 from '../assets/nft2.svg'
-import nft3 from '../assets/nft3.svg'
-import nft4 from '../assets/nft4.svg'
+import nft1 from "../assets/nft1.svg";
+import nft2 from "../assets/nft2.svg";
+import nft3 from "../assets/nft3.svg";
+import nft4 from "../assets/nft4.svg";
 
 export const Main = () => {
-
-  const [accountState, accountDispatch] = useAccountContext()
-
-
-
-
- 
+  const [accountState, accountDispatch] = useAccountContext();
+  const [isMinting, setIsMinting] = useState(false);
+  const [transactionList, setTransactionList] = useState<string[]>([]);
 
   const askContractToMintNft = async () => {
     try {
@@ -29,68 +26,88 @@ export const Main = () => {
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
-        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer);
-
-        console.log("Going to pop wallet now to pay gas...")
+        const connectedContract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          myEpicNft.abi,
+          signer
+        );
         let nftTxn = await connectedContract.makeAnEpicNFT();
 
-        console.log("Mining...please wait.")
+        setIsMinting(true);
         await nftTxn.wait();
-
-        console.log(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`);
-
+        setIsMinting(false);
+        setTransactionList([
+          ...transactionList,
+          `https://rinkeby.etherscan.io/tx/${nftTxn.hash}`,
+        ]);
+        console.log(`Mined, see transaction: }`);
       } else {
         console.log("Ethereum object doesn't exist!");
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
   const renderNotConnectedContainer = () => (
-    <button
-    disabled
-      className="cta-button mint-button"
-    >
+    <button disabled className="cta-button mint-button">
       Please connect wallet to start minting
     </button>
   );
-
 
   useEffect(() => {
     checkIfWalletIsConnected(accountDispatch);
   }, []);
 
-  console.log('accountState.account}', accountState.account)
+  console.log("accountState.account}", accountState.account);
 
   const renderNFTs = () => {
-    const nfts = [nft1, nft2,nft3,nft4]
-    return nfts.map(nft => <img className={'its-nft-babe'} src={nft}/>)
-  }
+    const nfts = [nft1, nft2, nft3, nft4];
+    return nfts.map((nft) => <img className={"its-nft-babe"} src={nft} alt="nfts"/>);
+  };
 
   return (
     <div className="header-container">
-      <Header/>
+      <Header />
+      <div className={"nft-wrapper"}>{renderNFTs()}</div>
       {/* <img className={'its-doge-babe'} src={doge} alt={'doge'}/> */}
       <p className="heading gradient-text">Emoji Heroes NFT collection</p>
       <p className="sub-text">
         Emoji Heroes, each NFT has a hero avatar, weapon, and a pet
       </p>
-      <p className="sub-text">
-        Start minting get yours 🥷🏻🎸🦥
-      </p>
+      <p className="sub-text">Start minting get yours 🥷🏻🎸🦥</p>
       {accountState.account === null ? (
         renderNotConnectedContainer()
       ) : (
         <button
           onClick={askContractToMintNft}
           className="cta-button mint-button"
+          disabled={isMinting}
         >
-          Start Minting
+          {!isMinting ? `Start Minting` : `Mining ...`}
         </button>
       )}
-      <div className={'nft-wrapper'}>
-        {renderNFTs()}
+      {transactionList.length && <div>
+         <p className="sub-text transactions">Transactions</p>
+        <ul>
+          {transactionList.map((t, i) => (
+            <li>
+              <a href={t} target="_blank" rel="noreferrer" className={"link"}>
+                Etherscan
+              </a>
+              -
+              <a
+                href={accountState?.openSeaLinks[i]}
+                target="_blank"
+                rel="noreferrer"
+                className={"link"}
+              >
+                OpenSea
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
+}
     </div>
   );
 };

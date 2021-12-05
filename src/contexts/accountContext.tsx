@@ -16,6 +16,7 @@ type AccountContextType = [AccountState, React.Dispatch<AccountAction>];
 export type Props = {
   children: React.ReactNode;
 };
+const rinkebyChainId = "0x4";
 
 //@ts-ignore
 const AccountContext = createContext<AccountContextType>(null);
@@ -29,64 +30,68 @@ const AccountContextProvider = (props: Props): JSX.Element => {
   );
 };
 
-async function connectWallet(dispatch:React.Dispatch<AccountAction>) {
-  dispatch({type: AccountActionTypes.SET_ISLOADING, payload:true})
+async function connectWallet(dispatch: React.Dispatch<AccountAction>) {
+  dispatch({ type: AccountActionTypes.SET_ISLOADING, payload: true });
   try {
-    const { ethereum  } = window;
+    const { ethereum } = window;
 
     if (!ethereum) {
       alert("Get MetaMask!");
       return;
     }
-    const provider  = new ethers.providers.Web3Provider(ethereum)
-    const signer = provider.getSigner();
-    const accounts = await ethereum.request({ method: "eth_requestAccounts" },signer);
-    const balance = await provider.getBalance(accounts[0])
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+    const balance = await provider.getBalance(accounts[0]);
 
     const payload = {
       address: accounts[0],
-      balance: Number(ethers.utils.formatEther(balance)).toFixed(3)
-    }
+      balance: Number(ethers.utils.formatEther(balance)).toFixed(3),
+    };
+
     console.log("Connected", accounts);
-    dispatch({type: AccountActionTypes.SET_ACCOUNT, payload})
-    dispatch({type: AccountActionTypes.SET_ISLOADING, payload:false})
-    setupEventListener()
+    dispatch({ type: AccountActionTypes.SET_ACCOUNT, payload });
+    dispatch({ type: AccountActionTypes.SET_ISLOADING, payload: false });
+    setupEventListener(dispatch);
   } catch (error) {
-    console.log(error)
-    dispatch({type: AccountActionTypes.SET_ACCOUNT_FAILURE})
+    console.log(error);
+    dispatch({ type: AccountActionTypes.SET_ACCOUNT_FAILURE });
   }
 }
 
- const setupEventListener = async () => {
-  // Most of this looks the same as our function askContractToMintNft
+const setupEventListener = async (dispatch: React.Dispatch<AccountAction>) => {
   try {
     const { ethereum } = window;
-      const provider = new ethers.providers.Web3Provider(ethereum);
-      const signer = provider.getSigner();
-      const connectedContract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        myEpicNft.abi,
-        signer
-      );
+    const provider = new ethers.providers.Web3Provider(ethereum, "any");
+    const signer = provider.getSigner();
+    const connectedContract = new ethers.Contract(
+      CONTRACT_ADDRESS,
+      myEpicNft.abi,
+      signer
+    );
+    connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
+      const payload = `${OPENSEA_LINK}${CONTRACT_ADDRESS}/${tokenId.toNumber()}`;
+      alert(`Hey there! We've minted your NFT and sent it to your wallet. 
+      It may be blank right now. It can take a max of 10 min to show up on OpenSea.`)
+      dispatch({ type: AccountActionTypes.SET_OPENSEA_LINK, payload });
+    });
 
-      connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
-        console.log(from, tokenId.toNumber());
-        alert(`Hey there! We've minted your NFT and sent it to your wallet. 
-          It may be blank right now. It can take a max of 10 min to show up on OpenSea. 
-          Here's the link: ${OPENSEA_LINK}${CONTRACT_ADDRESS}/${tokenId.toNumber()}`);
-      });
-
-      console.log("Setup event listener!");
-    }
-   catch (error) {
+    provider.on("network", (newNetwork, oldNetwork) => {
+      // When a Provider makes its initial connection, it emits a "network"
+      // event with a null oldNetwork along with the newNetwork. So, if the
+      // oldNetwork exists, it represents a changing network
+      if (oldNetwork) {
+        alert(newNetwork);
+        window.location.reload();
+      }
+    });
+  } catch (error) {
     console.log(error);
   }
 };
 
-const checkIfWalletIsConnected = async (dispatch:React.Dispatch<AccountAction>) => {
-  /*
-   * First make sure we have access to window.ethereum
-   */
+const checkIfWalletIsConnected = async (
+  dispatch: React.Dispatch<AccountAction>
+) => {
   const { ethereum } = window;
 
   if (!ethereum) {
@@ -95,40 +100,54 @@ const checkIfWalletIsConnected = async (dispatch:React.Dispatch<AccountAction>) 
   } else {
     console.log("We have the ethereum object", ethereum);
   }
-  checkChain();
 
-  const accounts = await ethereum.request({ method: "eth_accounts" });
-  const provider  = new ethers.providers.Web3Provider(ethereum)
+  const chainId = await ethereum.request({ method: "eth_chainId" });
+  console.log("Connected to chain " + chainId);
 
-  if (accounts.length !== 0) {
-    const account = accounts[0];
-    const balance = await provider.getBalance(accounts[0])
-
-    const payload = {
-      address: accounts[0],
-      balance: Number(ethers.utils.formatEther(balance)).toFixed(3)
-    }
-    dispatch({type: AccountActionTypes.SET_ACCOUNT, payload})
-    // setupEventListener();
+  if (chainId !== rinkebyChainId) {
+    dispatch({ type: AccountActionTypes.SET_DISABLE_APP, payload: true });
+    dispatch({ type: AccountActionTypes.SET_ACCOUNT, payload: null });
+    return;
   } else {
-    console.log("No authorized account found");
+    dispatch({ type: AccountActionTypes.SET_DISABLE_APP, payload: false });
+    const accounts = await ethereum.request({ method: "eth_accounts" });
+    const provider = new ethers.providers.Web3Provider(ethereum);
+
+    if (accounts.length !== 0) {
+      const account = accounts[0];
+      const balance = await provider.getBalance(account);
+
+      const payload = {
+        address: account,
+        balance: Number(ethers.utils.formatEther(balance)).toFixed(3),
+      };
+      dispatch({ type: AccountActionTypes.SET_ACCOUNT, payload });
+      setupEventListener(dispatch);
+    } else {
+      console.log("No authorized account found");
+    }
   }
 };
 
-const checkChain = async () => {
-  const { ethereum } = window;
-    let chainId = await ethereum.request({ method: "eth_chainId" });
-    console.log("Connected to chain " + chainId);
-
-    // String, hex code of the chainId of the Rinkebey test network
-    const rinkebyChainId = "0x4";
-    if (chainId !== rinkebyChainId) {
-      alert("You are not connected to the Rinkeby Test Network!");
-      return;
-    }
-  
+const changeNetwork = async () => {
+  try {
+    const { ethereum } = window;
+    await ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: rinkebyChainId }],
+    });
+  } catch (e) {
+    console.error(e);
+  }
+  // String, hex code of the chainId of the Rinkebey test network
 };
 
 const useAccountContext = () => useContext(AccountContext);
 
-export { AccountContextProvider, useAccountContext, connectWallet, checkIfWalletIsConnected };
+export {
+  AccountContextProvider,
+  useAccountContext,
+  connectWallet,
+  checkIfWalletIsConnected,
+  changeNetwork,
+};
