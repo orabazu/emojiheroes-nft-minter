@@ -14,13 +14,21 @@
 }
 
 .header-container {
-  padding-top: 30px;
 }
 
-.header {
+.heading {
   margin: 0;
   font-size: 50px;
   font-weight: bold;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin: 30px;
+  align-items:center;
+  background: -webkit-linear-gradient(left,#60c657, #35aee2) 0 100% no-repeat;
+  background-size: 100% 2px;
 }
 
 .sub-text {
@@ -49,16 +57,28 @@
 }
 
 .connect-wallet-button {
-  background: -webkit-linear-gradient(left, #60c657, #35aee2);
-  background-size: 200% 200%;
-  animation: gradient-animation 4s ease infinite;
-}
-
-.mint-button {
   background: -webkit-linear-gradient(left, #a200d6, #ff6fdf);
   background-size: 200% 200%;
   animation: gradient-animation 4s ease infinite;
+  margin-left: auto;
+  border-radius: 0;
+  align-items: center;
+  display: flex
+}
+
+.its-unicorn-baby {
+  font-size: 70px;
+}
+
+.mint-button {
+  background: -webkit-linear-gradient(left, #60c657, #35aee2);
+  background-size: 200% 200%;
+  animation: gradient-animation 4s ease infinite;
   margin-right: 15px;
+}
+
+.mint-button:disabled{
+  opacity: 0.5;
 }
 
 .opensea-button {
@@ -122,4 +142,24 @@
   100% {
     background-position: 0% 50%;
   }
+}
+
+.its-eth-babe{
+  height: 25px;
+  margin: 5px;
+}
+
+.its-doge-babe{
+  height: 300px;
+}
+
+.its-nft-babe{
+  height: 250px;
+}
+
+.nft-wrapper {
+}
+
+.nft-wrapper .its-nft-babe{
+  padding: 20px 10px;
 }
